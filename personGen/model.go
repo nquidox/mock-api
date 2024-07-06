@@ -1,6 +1,7 @@
 package personGen
 
 import (
+	"errors"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"math/rand"
@@ -59,10 +60,12 @@ func (p *Person) Create() {
 func (p *Person) Read() error {
 	err := DBC.Table("people").
 		Where("passport_serie = ? AND passport_number = ?", p.PassportSerie, p.PassportNumber).
-		First(p).Error
-	if err != nil {
+		First(&p).Error
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
+
 	return nil
 }
 

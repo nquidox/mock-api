@@ -11,6 +11,7 @@ import (
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	queryParams := r.URL.Query()
+	log.Info("Query Params: ", queryParams)
 
 	passportSerie := queryParams.Get("passportSerie")
 	ps, err := strconv.Atoi(passportSerie)
@@ -33,6 +34,7 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = person.Read()
 	if err != nil {
+		log.Error(err)
 		w.WriteHeader(500)
 	}
 
@@ -46,7 +48,13 @@ func InfoHandler(w http.ResponseWriter, r *http.Request) {
 		"Город":   person.Address,
 		"Паспорт": fmt.Sprintf("%d %d", person.PassportSerie, person.PassportNumber),
 	}).Info("JSON Response")
-	bytes, _ := json.Marshal(person)
-	_, _ = w.Write(bytes)
+	bytes, err := json.Marshal(&person)
+	if err != nil {
+		log.Error(err)
+	}
 
+	_, err = w.Write(bytes)
+	if err != nil {
+		log.Error(err)
+	}
 }
